@@ -1,46 +1,31 @@
-apply plugin: 'com.android.library'
-
-
-android {
-
-    defaultConfig {
-        compileSdkVersion ver_compileSdkVersion
-        targetSdkVersion ver_aimsdk
-        minSdkVersion ver_minsdk
-        vectorDrawables.useSupportLibrary = true
-
+buildscript {
+    repositories {
+        mavenLocal()
+        google()
+        jcenter()
+        maven { url 'https://jitpack.io' }
     }
-
-
-
-    buildTypes {
-        debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-        }
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-        }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.0.4'
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    lintOptions {
-        abortOnError false
-    }
-
 }
 
-
-dependencies {
-    api libs_anno
-    api libs_core
-    api ('androidx.customview:customview:1.1.0') {
-        exclude module:"core"
-    }
-    implementation libs_compat
-    implementation libs_compat
+ext{
+    //compileSdkVersion = 28
+    //minSdkVersion = 19
+    //targetSdkVersion = 28
 }
+
+allprojects {
+    repositories {
+        mavenLocal()
+        google()
+        jcenter()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+}
+//
+//task clean(type: Delete) {
+//    delete rootProject.buildDir
+//}
