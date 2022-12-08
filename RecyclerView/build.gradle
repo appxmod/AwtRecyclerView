@@ -1,4 +1,6 @@
+apply plugin: 'maven-publish'
 apply plugin: 'com.android.library'
+
 
 
 android {
@@ -36,23 +38,22 @@ android {
 
 
 dependencies {
+    api libs_compat
     api libs_anno
-    api libs_core
-    api libs_collection
     api ('androidx.customview:customview:1.1.0') {
         exclude module:"core"
     }
-    implementation libs_compat
 }
-apply plugin: 'maven-publish'
-publishing {
-    publications {
-        maven(MavenPublication) {
-            artifact "build\\outputs\\aar\\RecyclerView-debug.aar"
-            //from components.java
-            groupId "org.appxmod.android"
-            artifactId "RecyclerView"
-            version "1.0.0"
+
+afterEvaluate {
+    publishing {
+        publications {
+            mavenAll(MavenPublication) {
+                from components.all
+                groupId "org.appxmod.android"
+                artifactId "RecyclerView"
+                version "1.0.0"
+            }
         }
     }
 }
