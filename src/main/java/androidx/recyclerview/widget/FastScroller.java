@@ -29,6 +29,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.appcompat.app.GlobalOptions;
 import androidx.core.view.ViewCompat;
 
 import java.lang.annotation.Retention;
@@ -225,6 +226,11 @@ class FastScroller extends RecyclerView.ItemDecoration implements RecyclerView.O
     }
 
     public void show() {
+		if(GlobalOptions.bStretching) {
+			mAnimationState = ANIMATION_STATE_IN;
+			hide(300);
+			return;
+		}
         switch (mAnimationState) {
             case ANIMATION_STATE_FADING_OUT:
                 mShowHideAnimator.cancel();
@@ -359,7 +365,9 @@ class FastScroller extends RecyclerView.ItemDecoration implements RecyclerView.O
                 (int) ((verticalVisibleLength * middleScreenPos) / verticalContentLength);
             mVerticalThumbHeight = Math.min(verticalVisibleLength,
                 (verticalVisibleLength * verticalVisibleLength) / verticalContentLength);
-        }
+			mVerticalThumbHeight = Math.max(100, mVerticalThumbHeight);
+			mVerticalThumbCenterY = (int)((verticalVisibleLength - mVerticalThumbHeight) * offsetY / ((float)verticalContentLength - verticalVisibleLength) + mVerticalThumbHeight / 2.0);
+		}
 
         if (mNeedHorizontalScrollbar) {
             float middleScreenPos = offsetX + horizontalVisibleLength / 2.0f;
@@ -444,10 +452,10 @@ class FastScroller extends RecyclerView.ItemDecoration implements RecyclerView.O
 
     private void verticalScrollTo(float y) {
         final int[] scrollbarRange = getVerticalRange();
-        y = Math.max(scrollbarRange[0], Math.min(scrollbarRange[1], y));
-        if (Math.abs(mVerticalThumbCenterY - y) < 2) {
-            return;
-        }
+//        y = Math.max(scrollbarRange[0], Math.min(scrollbarRange[1], y));
+//        if (Math.abs(mVerticalThumbCenterY - y) < 2) {
+//            return;
+//        }
         int scrollingBy = scrollTo(mVerticalDragY, y, scrollbarRange,
                 mRecyclerView.computeVerticalScrollRange(),
                 mRecyclerView.computeVerticalScrollOffset(), mRecyclerViewHeight);

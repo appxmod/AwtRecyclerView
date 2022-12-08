@@ -435,8 +435,8 @@ public class ItemTouchHelper extends RecyclerView.ItemDecoration
      * When user started to drag scroll. Reset when we don't scroll
      */
     private long mDragScrollStartTimeInMs;
-
-    /**
+	
+	/**
      * Creates an ItemTouchHelper that will work with the given Callback.
      * <p>
      * You can attach ItemTouchHelper to a RecyclerView via
@@ -773,7 +773,7 @@ public class ItemTouchHelper extends RecyclerView.ItemDecoration
                 scrollY = topDiff;
             } else if (mDy > 0) {
                 final int bottomDiff = curY + mSelected.itemView.getHeight() + mTmpRect.bottom
-                        - (mRecyclerView.getHeight() - mRecyclerView.getPaddingBottom());
+                        - (mRecyclerView.getHeight() - mRecyclerView.getPaddingBottom() - mCallback.mBottomScrollTol);
                 if (bottomDiff > 0) {
                     scrollY = bottomDiff;
                 }
@@ -1274,14 +1274,17 @@ public class ItemTouchHelper extends RecyclerView.ItemDecoration
                 final float yVelocity = mVelocityTracker.getYVelocity(mActivePointerId);
                 final int velDirFlag = yVelocity > 0f ? DOWN : UP;
                 final float absYVelocity = Math.abs(yVelocity);
+                final float absDy = Math.abs(mDy);
+                //android.util.Log.e("mDymDy", absDy+" vs "+mCallback.getSwipeEscapeVelocity(mSwipeEscapeVelocity));
+                //android.util.Log.e("mDymDy 2", absYVelocity+" vs "+Math.abs(xVelocity));
                 if ((velDirFlag & flags) != 0 && velDirFlag == dirFlag
-                        && absYVelocity >= mCallback.getSwipeEscapeVelocity(mSwipeEscapeVelocity)
-                        && absYVelocity > Math.abs(xVelocity)) {
+                        && absDy >= mCallback.getSwipeEscapeVelocity(mSwipeEscapeVelocity)
+                        && absYVelocity >= Math.abs(xVelocity)) {
                     return velDirFlag;
                 }
             }
-
-            final float threshold = mRecyclerView.getHeight() * mCallback
+			
+            final float threshold = (viewHolder.itemView.getHeight()) * mCallback
                     .getSwipeThreshold(viewHolder);
             if ((flags & dirFlag) != 0 && Math.abs(mDy) > threshold) {
                 return dirFlag;
@@ -1387,6 +1390,7 @@ public class ItemTouchHelper extends RecyclerView.ItemDecoration
      */
     @SuppressWarnings("UnusedParameters")
     public abstract static class Callback {
+		public int mBottomScrollTol;
 
         @SuppressWarnings("WeakerAccess")
         public static final int DEFAULT_DRAG_ANIMATION_DURATION = 200;
@@ -1901,7 +1905,7 @@ public class ItemTouchHelper extends RecyclerView.ItemDecoration
             }
         }
 
-        private int getMaxDragScroll(RecyclerView recyclerView) {
+        protected int getMaxDragScroll(RecyclerView recyclerView) {
             if (mCachedMaxScrollSpeed == -1) {
                 mCachedMaxScrollSpeed = recyclerView.getResources().getDimensionPixelSize(
                         R.dimen.item_touch_helper_max_drag_scroll_per_frame);

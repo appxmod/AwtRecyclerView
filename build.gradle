@@ -23,7 +23,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 
+    lintOptions {
+        abortOnError false
+    }
 
 }
 
@@ -31,5 +38,9 @@ android {
 dependencies {
     api libs_anno
     api libs_core
-    api 'androidx.customview:customview:1.1.0'
+    api ('androidx.customview:customview:1.1.0') {
+        exclude module:"core"
+    }
+    implementation libs_compat
+    implementation libs_compat
 }

@@ -19,6 +19,7 @@ import android.annotation.SuppressLint;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.CMN;
 import androidx.core.os.TraceCompat;
 
 import java.util.ArrayList;
@@ -399,7 +400,9 @@ final class GapWorker implements Runnable {
             prefetch(nextFrameNs);
 
             // TODO: consider rescheduling self, if there's more work to do
-        } finally {
+        } catch (Exception e){
+			CMN.Log(e);
+		} finally {
             mPostTimeNs = 0;
             TraceCompat.endSection();
         }

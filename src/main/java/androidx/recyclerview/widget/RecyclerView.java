@@ -66,6 +66,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.Px;
 import androidx.annotation.RestrictTo;
 import androidx.annotation.VisibleForTesting;
+import androidx.appcompat.app.GlobalOptions;
 import androidx.core.os.TraceCompat;
 import androidx.core.util.Preconditions;
 import androidx.core.view.AccessibilityDelegateCompat;
@@ -535,13 +536,13 @@ public class RecyclerView extends ViewGroup implements ScrollingView,
 
     // Touch/scrolling handling
 
-    private int mScrollState = SCROLL_STATE_IDLE;
+    protected int mScrollState = SCROLL_STATE_IDLE;
     private int mScrollPointerId = INVALID_POINTER;
     private VelocityTracker mVelocityTracker;
     private int mInitialTouchX;
     private int mInitialTouchY;
-    private int mLastTouchX;
-    private int mLastTouchY;
+    public int mLastTouchX;
+    public int mLastTouchY;
     private int mTouchSlop;
     private OnFlingListener mOnFlingListener;
     private final int mMinFlingVelocity;
@@ -3386,6 +3387,9 @@ public class RecyclerView extends ViewGroup implements ScrollingView,
 
         if (action == MotionEvent.ACTION_DOWN) {
             mNestedOffsets[0] = mNestedOffsets[1] = 0;
+			if(GlobalOptions.bStretching) {
+				GlobalOptions.bStretching = false;
+			}
         }
         final MotionEvent vtev = MotionEvent.obtain(e);
         vtev.offsetLocation(mNestedOffsets[0], mNestedOffsets[1]);
@@ -6083,8 +6087,11 @@ public class RecyclerView extends ViewGroup implements ScrollingView,
                 return mState.isPreLayout();
             }
             if (holder.mPosition < 0 || holder.mPosition >= mAdapter.getItemCount()) {
-                throw new IndexOutOfBoundsException("Inconsistency detected. Invalid view holder "
-                        + "adapter position" + holder + exceptionLabel());
+				if (true) { // 111
+					throw new IndexOutOfBoundsException("Inconsistency detected. Invalid view holder "
+							+ "adapter position" + holder + exceptionLabel() + " " + mAdapter.getItemCount());
+				}
+				return true;
             }
             if (!mState.isPreLayout()) {
                 // don't check type if it is pre-layout.
@@ -7503,6 +7510,25 @@ public class RecyclerView extends ViewGroup implements ScrollingView,
          */
         public final void notifyDataSetChanged() {
             mObservable.notifyChanged();
+        }
+        
+        Runnable postDataSetChangedAbility;
+        long pendingDataSetChanged;
+        public final void postDataSetChanged(View v, int delay) {
+        	long now=System.currentTimeMillis();
+        	if(postDataSetChangedAbility==null) postDataSetChangedAbility= () -> {
+				notifyDataSetChanged();
+				pendingDataSetChanged=0;
+			};
+            else {
+				v.removeCallbacks(postDataSetChangedAbility);
+            	if(pendingDataSetChanged!=0 && pendingDataSetChanged-now>=delay) {
+					postDataSetChangedAbility.run();
+					return;
+				}
+			}
+			pendingDataSetChanged=now;
+        	v.postDelayed(postDataSetChangedAbility, delay);
         }
 
         /**
@@ -11333,6 +11359,10 @@ public class RecyclerView extends ViewGroup implements ScrollingView,
         public final int getPosition() {
             return mPreLayoutPosition == NO_POSITION ? mPosition : mPreLayoutPosition;
         }
+        
+        public final int getBindPosition() {
+            return mPosition;
+        }
 
         /**
          * Returns the position of the ViewHolder in terms of the latest layout pass.
@@ -13826,4 +13856,38 @@ public class RecyclerView extends ViewGroup implements ScrollingView,
         }
         return mScrollingChildHelper;
     }
+	
+	@Override
+	protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+		super.onScrollChanged(l, t, oldl, oldt);
+		if(mOnScrollChangeListener !=null)
+			mOnScrollChangeListener.onScrollChange(this,l,t,oldl,oldt);
+	}
+	
+	public void setOnScrollChangedListener(OnScrollChangedListener onSrollChangedListener) {
+		mOnScrollChangeListener =onSrollChangedListener;
+	}
+	protected OnScrollChangedListener mOnScrollChangeListener;
+	
+	public interface OnScrollChangedListener {
+		void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY);
+	}
+	
+	Runnable postTopRun;
+	
+	public void postTop(long delay) {
+		if(postTopRun==null) {
+			postTopRun = new Runnable() {
+				@Override
+				public void run() {
+					try {
+						((LinearLayoutManager)getLayoutManager()).scrollToPositionWithOffset(0,0);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			};
+		}
+		postDelayed(postTopRun, delay);
+	}
 }
