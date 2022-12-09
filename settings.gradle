@@ -10,3 +10,4 @@
 
 rootProject.name = "AwtRecyclerView"
 include ':RecyclerView'
+include ':recyclerViewFastScroller'
