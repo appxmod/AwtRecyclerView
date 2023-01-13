@@ -370,4 +370,8 @@ public class DragSelectRecyclerView extends RecyclerView {
     }
     return super.dispatchTouchEvent(e);
   }
+  
+  public boolean getDragSelectActive() {
+	  return dragSelectActive;
+  }
 }

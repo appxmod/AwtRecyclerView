@@ -11307,6 +11307,7 @@ public class RecyclerView extends ViewGroup implements ScrollingView,
                 throw new IllegalArgumentException("itemView may not be null");
             }
             this.itemView = itemView;
+			itemView.setTag(this);
         }
 
         void flagRemovedAndOffsetPosition(int mNewPosition, int offset, boolean applyToPreLayout) {
