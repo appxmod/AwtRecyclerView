@@ -27,7 +27,7 @@ android {
 dependencies {
     api (libs_anno)
     api libs_core
-    api(libs_recycler)
+    api project(":RecyclerView")
     api (libs_compat)
 }
 
