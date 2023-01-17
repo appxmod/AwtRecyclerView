@@ -1,4 +1,14 @@
 apply plugin: 'com.android.library'
+
+def mavenLocalFile = rootProject.file("../mavenLocal.properties");
+if (mavenLocalFile.exists()) {
+    def props = new Properties();
+    props.load(new FileInputStream(mavenLocalFile))
+    props.each { prop ->
+        project.ext.set(prop.key, prop.value)
+    }
+}
+
 android {
 
     defaultConfig {
